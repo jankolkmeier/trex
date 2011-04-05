@@ -1,0 +1,14 @@
+exports.Config = {
+    httpPort : 5000,
+    mysqlUser : "user",
+    mysqlPass : "pass",
+    mysqlDB   : "db",
+    mysqlHost : "host.com",
+    twitterClient : "",
+    mail : {
+        user: "gmail-user",
+        password: "pass",
+        host: "smtp.gmail.com",
+        ssl: true
+    }
+};

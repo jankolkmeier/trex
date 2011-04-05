@@ -1,0 +1,59 @@
+script(src="/raphael-min.js", type="application/javascript")
+script(src="/ajax.js", type="application/javascript")
+script(src="/visuals.js", type="application/javascript")
+div#tooltip
+    h4
+    p
+div#wrapper
+    div#head 
+        div#h
+            a(href="http://twitter.com/#!/rewardExp")
+                |T Rex -- Twente Reward EXperiment
+        div#loginwrap 
+            form#login(method="POST", action='/login')
+                Longin:
+                input#mail(type="text", name="mail", value="email")
+                input#pass(type="password", name="pass", value="pass")
+                input#submitlogin(type="submit", value="Login")
+                a(href="/register") Or register here!
+        div#menuwrap
+            a(href="/settings") Settings
+            a(href="https://chrome.google.com/webstore/detail/mcpdpdoemjljpflmpcldkiohgednnibl") Install Chrome Extension
+            a(href="/logout") Logout 
+        script
+            var ajax = function(action, success) {
+                var postData = {};
+                $.each($('#'+action).serializeArray(), function(i, field) {
+                    postData[field.name] = field.value;
+                });
+                request = $.post("/"+action, postData)
+                    .success(success) 
+                    .error(alert);
+                return false;
+            }
+            $('#submitlogin').click(function() { return ajax("login",
+                function(data){
+                    if (data['success']) {
+                        $('#canvas').show();
+                        $('#loginwrap').hide();
+                        $('#menuwrap').show();
+                        userid = data['user']['id'];
+                        $('#profilelink').attr('href',
+                            '/usrgrp/'+userid);
+                        startVisuals($('#canvas'));
+                    } else {
+                        alert("Login failed."+data['error']);
+                    }
+                });
+            });
+    div#canvas
+script
+    if (userid) {
+        $('#canvas').show();
+        $('#loginwrap').hide();
+        $('#menuwrap').show();
+        startVisuals($('#canvas'));
+    } else {
+        $('#menuwrap').hide();
+        $('#canvas').hide();
+    }

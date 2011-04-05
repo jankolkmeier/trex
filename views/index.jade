@@ -1,0 +1,201 @@
+script
+    ajax = function(action, success) {
+        var postData = {};
+        $.each($('#'+action).serializeArray(), function(i, field) {
+            postData[field.name] = field.value;
+        });
+        console.log(postData);
+        request = $.post("/"+action, postData)
+            .success(success) 
+            .error(alert);
+        setTimeout(function() {
+            refreshLeaveList();
+            refreshNotify();
+            refreshImgList();
+            refreshJoinList();
+        }, 2000);
+        return false;
+    }
+
+    $(document).ready(function() {
+        $(".box h3").not(".notoggle").click(function() {
+            if ($(this).siblings('p').first().is(':visible'))
+                $(this).siblings().not('script').slideUp(400);
+            else
+                $(this).siblings().not('script').slideDown(400);
+        });
+        $(".box h3").click();
+    });
+div#wrapper.home
+    div#header
+        p
+            a(href="http://twitter.com/#!/rewardExp") Follow rewardExp
+            br
+            a(href="/") BACK TO APP
+    div.box.half.online
+        h3 Modify Pictures
+        p
+            form#uploadavatar(method="POST", action='/uploadavatar', enctype="multipart/form-data")
+                span New image for:
+                select#imgfor(name="id")
+                input#image(name="image", type="file")
+                input#submituploadavatar(type="submit", value="Upload")
+        script
+            refreshImgList = function() {
+                if (!userid) return;
+                $.get("/api/user/"+userid+"/groups")
+                    .success(function(data) {
+                        var gid = userid;
+                        var gname = "You";
+                        var newList = "<option value='"+gid+"'>"+gname+"</option>";
+                        $.each(data["groups"], function(key, object) {
+                            var gid = object["id"];
+                            var gname = object["name"];
+                            newList += "<option value='"+gid+"'>"+gname+"</option>";
+                        });
+                        if (newList.length>0)  {
+                            $("#imgfor").html(newList);
+                        }
+                    });
+            }
+            refreshImgList();
+    div.box.half.online
+        h3 Set Notifications 
+        p 
+            form#updatenotify(method="POST", action='/joingroup')
+                span Twitter:
+                input.notify#notifyTwitter(type="checkbox", name="twitter")
+                br
+                span Mail:
+                input.notify#notifyMail(type="checkbox", name="mail")
+                br
+                span Desktop:
+                a(href="https://chrome.google.com/webstore/detail/mcpdpdoemjljpflmpcldkiohgednnibl") Chrome Extension
+                br
+                input#submitupdatenotify(type="submit", value="Update")
+                br
+        script
+            refreshNotify = function() {
+                if (!userid) return;
+                $.get("/updatenotify")
+                .success(function(data) {
+                    $('#notifyMail').attr('checked',
+                    data["notify"]["notifyMail"]);
+                    $('#notifyTwitter').attr('checked',
+                    data["notify"]["notifyTwitter"]);
+                });
+            }
+            $('#submitupdatenotify').click(function() { return ajax("updatenotify",
+                function(data){
+                    if (data['success']) {
+                        $("#updatenotify").parents('.box').find('h3').click();
+                    } else {
+                        alert("Failed. "+data['error']);
+                    }
+                });
+            });
+            refreshNotify();
+    div.box.half.online
+        h3 Create Group
+        p Open up a new group.
+            form#creategroup(method="POST", action='/creategroup')
+                span Groupname:
+                input#name(type="text", name="group")
+                br
+                span.full Description:
+                input#desc.full(type="text", name="msg")
+                br
+                span Join group:
+                input#join(type="checkbox", checked, name="join")
+                input#submitcreategroup(type="submit", value="Open group")
+        script
+            $('#submitcreategroup').click(function() { return ajax("creategroup",
+                function(data){
+                    if (data['success']) {
+                        $("#creategroup").parents('.box').find('h3').click();
+                        $(":input", "#creategroup")
+                            .not(':button, :submit, :reset, :hidden')
+                            .val('');
+                    } else {
+                        alert("Failed. "+data['error']);
+                    }
+                });
+            });
+    div.box.half.online
+        h3 Join Group
+        p Join existing Group:
+            form#joingroup(method="POST", action='/joingroup')
+                span Groupname:
+                select#joinlist(name="group")
+                br
+                br
+                span.full Write a nice welcome message:
+                input.full(name="msg", type="text")
+                br
+                input#submitjoingroup(type="submit", value="Join group")
+        script
+            refreshJoinList = function() {
+                if (!userid) return;
+                $.get("/api/user/"+userid+"/groups/notmemberof")
+                    .success(function(data) {
+                        var newList = "";
+                        $.each(data["groups"], function(key, object) {
+                            var gid = object["id"];
+                            var gname = object["name"];
+                            newList += "<option value='"+gid+"'>"+gname+"</option>";
+                        });
+                        if (newList.length>0) $("#joinlist").html(newList);
+                    });
+            }
+            refreshJoinList();
+            $('#submitjoingroup').click(function() { return ajax("joingroup",
+                function(data){
+                    if (data['success']) {
+                        $("#joingroup").parents('.box').find('h3').click();
+                        $(":input", "#joingroup")
+                            .not(':button, :submit, :reset, :hidden')
+                            .val('');
+                    } else {
+                        alert("Failed. "+data['error']);
+                    }
+                });
+            });
+    div.box.half.online
+        h3 Leave Group
+        p
+            form#leavegroup(method="POST", action='/leavegroup')
+                span Groupname:
+                select#leavelist(name="usrgrpid")
+                br
+                input#submitleavegroup(type="submit", value="Leave group")
+        script
+            refreshLeaveList = function() {
+                if (!userid) return;
+                $.get("/api/user/"+userid+"/groups")
+                    .success(function(data) {
+                        var newList = "";
+                        $.each(data["groups"], function(key, object) {
+                            var gid = object["id"];
+                            var gname = object["name"];
+                            newList += "<option value='"+gid+"'>"+gname+"</option>";
+                        });
+                        if (newList.length>0)  {
+                            $("#leavelist").html(newList);
+                            $("#dropgroup").html(newList);
+                            $('#dropgroup').change();
+                        }
+                    });
+            }
+            refreshLeaveList();
+            $('#submitleavegroup').click(function() { return ajax("leavegroup",
+                function(data){
+                    if (data['success']) {
+                        $(":input", "#leavegroup")
+                            .not(':button, :submit, :reset, :hidden')
+                            .val('');
+                        $("#leavegroup").parents('.box').find('h3').click();
+                    } else {
+                        alert("Failed. "+data['error']);
+                    }
+                });
+            });

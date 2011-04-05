@@ -1,0 +1,25 @@
+script(src="/jcrop-min.js", type="application/javascript")
+link(rel="stylesheet", href="/jcrop.css", type="text/css")
+div#wrapper.img
+    | <img src="/tmp/!{img}" id="cropbox" />
+    form(method="POST")
+        input#rectA(type="hidden", name="a", value="100")
+        input#rectX(type="hidden", name="xoff", value="0")
+        input#rectY(type="hidden", name="yoff", value="0")
+        p
+            input(type="submit", value="Crop!")
+script
+    var updateCoords = function(c) {
+        $('#rectA').val(c.w);
+        $('#rectX').val(c.x);
+        $('#rectY').val(c.y);
+    };
+
+    $(document).ready(function() {
+        $('#cropbox').Jcrop({
+            aspectRatio: 1,
+            onSelect: updateCoords,
+            boxWidth:700,
+            setSelect: [10,10,100,100]
+        });
+    });

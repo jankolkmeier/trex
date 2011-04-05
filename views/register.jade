@@ -1,0 +1,42 @@
+div#wrapper.home
+    div.box.green.half.offline
+        h3 Create Account
+        p Create an account to participate!
+            form#createaccount(method="POST", action='/createaccount')
+                span Name:
+                input#first(name="name", type="text")
+                br
+                span Password:
+                input#pass(name="pass", type="password")
+                br
+                span Twitter name:
+                input#twit(name="twitter", type="text")
+                br
+                span Email:
+                input#mail(name="mail", type="text")
+                br
+                span Say something nice:
+                input#first(name="msg", type="text")
+                br
+                input#submitcreateaccount(type="submit", value="Create Account")
+        script
+            ajax = function(action, success) {
+                var postData = {};
+                $.each($('#'+action).serializeArray(), function(i, field) {
+                    postData[field.name] = field.value;
+                });
+                request = $.post("/"+action, postData)
+                    .success(success) 
+                    .error(alert);
+                return false;
+            }
+            $('#submitcreateaccount').click(function() { return ajax("createaccount",
+                function(data){
+                    if (data['success']) {
+                        userid = data['user']['id'];
+                        window.location = "/";
+                    } else {
+                        alert("Registration failed."+data['error']);
+                    }
+                });
+            });

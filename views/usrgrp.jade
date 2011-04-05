@@ -1,0 +1,23 @@
+div#wrapper.home
+    br
+    a(href="/") GO TO APP 
+    div.box.green.half.offline
+        | <img style="float:right;margin:10px;" src="!{usrgrp.icon}" />
+        h3= usrgrp.name 
+        p= usrgrp.msg
+        h4 Recent rewards:
+        -if (rewards.length)
+            ul#rewards
+            - rewards.forEach(function(reward) {
+                li.reward
+                    div.amounttype
+                        span.amount +
+                            = reward.amount
+                            | 
+                        span.type= reward.type
+                            |(s)
+                    span.from
+                        | !{reward.reason}
+                        | <a href="/usrgrp/!{reward.fId}">(!{reward.fName})</a>
+            - })
+        br
